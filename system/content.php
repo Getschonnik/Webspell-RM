@@ -165,7 +165,8 @@ function get_mainContent () {
     global $maxtopics, $plugin_path, $maxposts, $page, $action, $preview, $message, $topicID, $_database, $maxmessages, $new_chmod;
     global $hp_title, $default_format_date, $default_format_time, $register_per_ip;$rewriteBase;
     
-
+    $invalide = array('\\', '/', '/\/', ':', '.');
+    
                 /* Startpage */
                 $settings = safe_query("SELECT * FROM " . PREFIX . "settings");
                 $ds = mysqli_fetch_array($settings);
@@ -177,8 +178,23 @@ function get_mainContent () {
                     $site = getinput($_GET['site']);
                 }
 
-
-                $invalide = array('\\', '/', '/\/', ':', '.');
+				/* 
+                TYPE:              Modification
+                DESC:              if the first page should be a static page
+                ADMIN:             type in the admincenter as startpage (example):  static&staticID=1  
+                */
+				if (strpos($site, '&') !== false) {
+					try	{
+						$getModuleName = explode("&", $site);
+                        $moduleName = str_replace($invalide, ' ', $getModuleName[0]);
+						 if (file_exists("includes/modules/".$moduleName . ".php")) {
+							 header("Location: index.php?site=" . $site);
+						 }
+					} catch (Exception $e) {
+						//igno: exc
+					}
+				}  	
+                
                 $site = str_replace($invalide, ' ', $site);
                 $_plugin = new plugin_manager();
                 $_plugin->set_debug(DEBUG);
